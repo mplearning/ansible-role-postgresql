@@ -1,0 +1,6 @@
+---
+# Copied verbatim from RedHat.yml with minor changes
+postgresql_packages_default:
+  - postgresql
+  - postgresql-contrib
+  - python-psycopg2

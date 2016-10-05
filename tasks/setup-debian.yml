@@ -1,6 +1,8 @@
 ---
+# copied fro setup-redhat.yml, with minor changes
+
 - name: install postgresql packages
-  yum: >-
+  package: >-
     name={{ item }}
     state=installed
   with_items: "{{ postgresql_packages }}"
@@ -9,11 +11,12 @@
 
 - name: update pgdata bash_profile
   lineinfile: >-
-    dest=/var/lib/pgsql/.bash_profile
+    dest=/var/lib/postgresql/.bash_profile
     regexp="^PGDATA="
     line="PGDATA={{ postgresql_data_directory }}"
     backup=yes
   become: true
+  when: false
 
 - name: template postgresql.service
   template: >-
@@ -23,6 +26,7 @@
     group=root
     mode=0644
   become: true
+  when: ansible_service_mgr == 'systemd'
 
 - name: create postgresql data path
   file: >-
@@ -32,13 +36,6 @@
     group=postgres
     mode=0700
   become: true
-
-- name: initialize postgresql if necessary
-  command: >-
-    creates={{ postgresql_data_directory }}/PG_VERSION
-    /usr/bin/postgresql-setup initdb
-  become: true
-  notify: restart postgresql
 
 - name: create postgresql backup path
   file: >-

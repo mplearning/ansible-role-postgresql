@@ -5,12 +5,16 @@
 - include: setup-redhat.yml
   when: ansible_os_family == "RedHat"
 
+- include: setup-debian.yml
+  when: ansible_os_family == "Debian"
+
 - name: template postgresql pg_hba.conf
   template: >-
     src=pg_hba.conf.j2
     dest={{ postgresql_data_directory }}/pg_hba.conf
     owner={{ postgresql_admin_user }}
     backup=yes
+  become: true
   notify: restart postgresql
 
 - name: template postgresql postgrseql.conf
@@ -19,10 +23,12 @@
     dest={{ postgresql_data_directory }}/postgresql.conf
     owner={{ postgresql_admin_user }}
     backup=yes
+  become: true
   notify: restart postgresql
 
 - name: enable and start postgresql
   service: name={{ postgresql_service_name }} enabled=yes state=started
+  become: true
 
 - include: databases.yml
 
@@ -33,6 +39,7 @@
     owner=root
     group=root
     mode=0755
+  become: true
   when: postgresql_do_backup
 
 - name: create cron job for backups
@@ -43,4 +50,5 @@
     user="{{ postgresql_admin_user }}"
     job="/usr/local/bin/postgresql-backup"
     cron_file="ansible-postgresql-backup"
+  become: true
   when: postgresql_do_backup
