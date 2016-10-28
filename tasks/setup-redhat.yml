@@ -5,7 +5,6 @@
     state=installed
   with_items: "{{ postgresql_packages }}"
   register: postgresql_install_packages
-  become: true
 
 - name: update pgdata bash_profile
   lineinfile: >-
@@ -13,7 +12,6 @@
     regexp="^PGDATA="
     line="PGDATA={{ postgresql_data_directory }}"
     backup=yes
-  become: true
 
 - name: template postgresql.service
   template: >-
@@ -22,7 +20,6 @@
     owner=root
     group=root
     mode=0644
-  become: true
 
 - name: create postgresql data path
   file: >-
@@ -31,13 +28,11 @@
     owner=postgres
     group=postgres
     mode=0700
-  become: true
 
 - name: initialize postgresql if necessary
   command: >-
     creates={{ postgresql_data_directory }}/PG_VERSION
     /usr/bin/postgresql-setup initdb
-  become: true
   notify: restart postgresql
 
 - name: create postgresql backup path
@@ -47,4 +42,3 @@
     owner=postgres
     group=postgres
     mode=0700
-  become: true
